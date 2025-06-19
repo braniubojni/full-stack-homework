@@ -40,7 +40,7 @@ export default function GradesPage() {
   const [gradeValue, setGradeValue] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const { data: grades, isLoading } = useQuery<Grade[]>({
+  const { data = [], isLoading } = useQuery<Grade[]>({
     queryKey: [QUERY_KEYS.GRADES],
     queryFn: async () => {
       const response = await fetch(ROUTES.GRADES);
@@ -51,6 +51,7 @@ export default function GradesPage() {
     },
     initialData: [],
   });
+  const grades = (data || []) as Grade[];
   const { mutate, isError } = useMutation({
     mutationFn: async (newGrade: { class: string; grade: number }) => {
       const response = await fetch(ROUTES.GRADES, {
@@ -159,9 +160,15 @@ export default function GradesPage() {
                 onChange={handleClassChange}
                 required
               >
-                <MenuItem value="Math">Math</MenuItem>
-                <MenuItem value="Science">Science</MenuItem>
-                <MenuItem value="History">History</MenuItem>
+                <MenuItem data-testid="menu-option-Math" value="Math">
+                  Math
+                </MenuItem>
+                <MenuItem data-testid="menu-option-Science" value="Science">
+                  Science
+                </MenuItem>
+                <MenuItem data-testid="menu-option-History" value="History">
+                  History
+                </MenuItem>
               </Select>
             </FormControl>
 
@@ -195,7 +202,11 @@ export default function GradesPage() {
 
       <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 4 }}>
         {Object.entries(classStatistics).map(([className, stats]) => (
-          <Card key={className} sx={{ minWidth: 200, flex: '1 1 30%' }}>
+          <Card
+            key={className}
+            sx={{ minWidth: 200, flex: '1 1 30%' }}
+            data-testid={`class-stat-${className}`}
+          >
             <CardContent>
               <Typography variant="h6">{className}</Typography>
               <Typography variant="body1">Grades: {stats.count}</Typography>
@@ -222,10 +233,12 @@ export default function GradesPage() {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>ID</TableCell>
-                <TableCell>Class</TableCell>
-                <TableCell>Grade</TableCell>
-                <TableCell>Date Added</TableCell>
+                <TableCell data-testid={'table-header-ID'}>ID</TableCell>
+                <TableCell data-testid={'table-header-Class'}>Class</TableCell>
+                <TableCell data-testid={'table-header-Grade'}>Grade</TableCell>
+                <TableCell data-testid={'table-header-Date-Added'}>
+                  Date Added
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

@@ -37,7 +37,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Insert the new grade using raw SQL
     const result = await sql`
       INSERT INTO grades (class, grade)
       VALUES (${className}, ${gradeValue})
