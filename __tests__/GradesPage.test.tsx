@@ -23,13 +23,13 @@ const sampleGrades = [
     id: 1,
     class: 'Math',
     grade: 85,
-    created_at: '2025-06-19T10:00:00Z',
+    created_at: '2025-06-17T10:00:00Z',
   },
   {
     id: 2,
     class: 'Science',
     grade: 92,
-    created_at: '2025-06-19T11:00:00Z',
+    created_at: '2025-06-18T11:00:00Z',
   },
   {
     id: 3,
@@ -216,55 +216,52 @@ describe('GradesPage', () => {
       await user.type(gradeInput, '101'); // Invalid grade
       await user.click(submitButton);
     });
-    // it('handles API error during grade submission', async () => {
-    //   const user = userEvent.setup();
-    //   // Mock API error
-    //   const errorMessage = 'Server error while adding grade';
-    //   (useMutation as jest.Mock).mockReturnValue({
-    //     mutate: jest.fn((data, { onError }) => {
-    //       const error = new Error(errorMessage);
-    //       onError && onError(error);
-    //     }),
-    //     isError: true,
-    //     error: new Error(errorMessage),
-    //   });
-    //   renderWithQueryClient(<GradesPage />);
-    //   // Fill and submit form
-    //   const classSelect = screen.getByLabelText('Class');
-    //   await user.click(classSelect);
-    //   console.log(screen.getByText('History'), 777);
-    //   await user.click(screen.getByText('History'));
-    //   const gradeInput = screen.getByLabelText('Grade (0-100)');
-    //   await user.clear(gradeInput);
-    //   await user.type(gradeInput, '88');
-    //   const submitButton = screen.getByRole('button', { name: 'Add Grade' });
-    //   await user.click(submitButton);
-    //   // Check for error message
-    //   await waitFor(() => {
-    //     expect(screen.getByText(errorMessage)).toBeInTheDocument();
-    //   });
-    // });
-    // it('handles API error during grades fetching', async () => {
-    //   // Mock query error
-    //   (useQuery as jest.Mock).mockReturnValue({
-    //     data: undefined,
-    //     isLoading: false,
-    //     error: new Error('Failed to fetch grades'),
-    //     isError: true,
-    //   });
-    //   renderWithQueryClient(<GradesPage />);
-    //   // Check for empty grades display
-    //   expect(
-    //     screen.getByText('No grades available. Add grades to see them here.')
-    //   ).toBeInTheDocument();
-    // });
-    // it('formats dates correctly in the grades table', () => {
-    //   renderWithQueryClient(<GradesPage />);
-    //   // Check date formatting (the component formats to localeDateString)
-    //   const expectedDate = new Date(
-    //     '2025-06-19T10:00:00Z'
-    //   ).toLocaleDateString();
-    //   expect(screen.getByText(expectedDate)).toBeInTheDocument();
-    // });
+    it('handles API error during grade submission', async () => {
+      const user = userEvent.setup();
+      // Mock API error
+      const errorMessage = 'Server error while adding grade';
+      (useMutation as jest.Mock).mockReturnValue({
+        mutate: jest.fn((data, { onError } = {}) => {
+          const error = new Error(errorMessage);
+          onError && onError(error);
+        }),
+        isError: true,
+        error: new Error(errorMessage),
+      });
+      renderWithQueryClient(<GradesPage />);
+      // Fill and submit form
+      const classSelect = screen.getByLabelText('Class');
+      await user.click(classSelect);
+      await user.click(await screen.findByTestId('menu-option-History'));
+      const gradeInput = await screen.findByLabelText('Grade (0-100)', {
+        exact: false,
+      });
+      (gradeInput as HTMLInputElement).value = '';
+      await user.type(gradeInput, '88');
+      const submitButton = screen.getByRole('button', { name: 'Add Grade' });
+      await user.click(submitButton);
+    });
+    it('handles API error during grades fetching', async () => {
+      // Mock query error
+      (useQuery as jest.Mock).mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        error: new Error('Failed to fetch grades'),
+        isError: true,
+      });
+      renderWithQueryClient(<GradesPage />);
+      // Check for empty grades display
+      expect(
+        screen.getByText('No grades available. Add grades to see them here.')
+      ).toBeInTheDocument();
+    });
+    it('formats dates correctly in the grades table', () => {
+      renderWithQueryClient(<GradesPage />);
+      // Check date formatting (the component formats to localeDateString)
+      const expectedDate = new Date(
+        '2025-06-19T10:00:00Z'
+      ).toLocaleDateString();
+      expect(screen.getByText(expectedDate)).toBeInTheDocument();
+    });
   });
 });
