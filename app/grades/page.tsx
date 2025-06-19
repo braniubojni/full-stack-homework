@@ -1,31 +1,31 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import {
+  Alert,
   Box,
-  Typography,
-  TextField,
   Button,
-  Paper,
+  Card,
+  CardContent,
+  CircularProgress,
   FormControl,
   InputLabel,
-  Select,
   MenuItem,
+  Paper,
+  Select,
+  SelectChangeEvent,
+  Snackbar,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Alert,
-  Snackbar,
-  CircularProgress,
-  SelectChangeEvent,
-  Grid,
-  Card,
-  CardContent,
+  TextField,
+  Typography,
 } from '@mui/material';
-import { useAppContext } from '../context/AppContext';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import { QUERY_KEYS, ROUTES } from '../common/consts';
 
 type Grade = {
   id: number;
@@ -35,14 +35,49 @@ type Grade = {
 };
 
 export default function GradesPage() {
+  const queryClient = useQueryClient();
   const [className, setClassName] = useState<string>('');
   const [gradeValue, setGradeValue] = useState<string>('');
-  const [grades, setGrades] = useState<Grade[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-
-  const { refreshTrigger, triggerRefresh } = useAppContext();
+  const { data: grades, isLoading } = useQuery<Grade[]>({
+    queryKey: [QUERY_KEYS.GRADES],
+    queryFn: async () => {
+      const response = await fetch(ROUTES.GRADES);
+      if (!response.ok) {
+        throw new Error('Failed to fetch grades');
+      }
+      return response.json();
+    },
+    initialData: [],
+  });
+  const { mutate, isError } = useMutation({
+    mutationFn: async (newGrade: { class: string; grade: number }) => {
+      const response = await fetch(ROUTES.GRADES, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newGrade),
+      });
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to add grade');
+      }
+      return response.json();
+    },
+    onError: (error: Error) => {
+      setError(error instanceof Error ? error.message : 'Failed to add grade');
+    },
+    onSuccess: () => {
+      setClassName('');
+      setGradeValue('');
+      setSuccess('Grade added successfully');
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.GRADES],
+      });
+    },
+  });
 
   // Calculate class statistics
   const classStatistics = {
@@ -72,41 +107,13 @@ export default function GradesPage() {
     return Math.round((sum / grades.length) * 10) / 10;
   }
 
-  useEffect(() => {
-    // Initialize database on component mount
-    fetch('/api/init')
-      .then((response) => {
-        if (!response.ok) throw new Error('Failed to initialize database');
-      })
-      .catch((err) => {
-        console.error('Database initialization error:', err);
-      });
-  }, []);
-
-  useEffect(() => {
-    // Fetch grades
-    setLoading(true);
-    fetch('/api/grades')
-      .then((response) => {
-        if (!response.ok) throw new Error('Failed to fetch grades');
-        return response.json();
-      })
-      .then((data) => {
-        setGrades(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error('Error fetching grades:', err);
-        setError('Failed to load grades. Please try again.');
-        setLoading(false);
-      });
-  }, [refreshTrigger]);
-
   const handleClassChange = (event: SelectChangeEvent) => {
     setClassName(event.target.value);
   };
 
   const handleGradeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const val = event.target.value;
+    if (!/^\d*$/.test(val) || Number(val) > 100 || Number(val) < 0) return;
     setGradeValue(event.target.value);
   };
 
@@ -125,28 +132,9 @@ export default function GradesPage() {
       return;
     }
 
-    try {
-      const response = await fetch('/api/grades', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ class: className, grade }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to add grade');
-      }
-
-      setClassName('');
-      setGradeValue('');
-      setSuccess('Grade added successfully');
-      triggerRefresh(); // Refresh the table
-    } catch (err) {
-      console.error('Error adding grade:', err);
-      setError(err instanceof Error ? err.message : 'Failed to add grade');
-    }
+    setError(null);
+    setSuccess(null);
+    mutate({ class: className, grade });
   };
 
   return (
@@ -180,10 +168,9 @@ export default function GradesPage() {
             <TextField
               label="Grade (0-100)"
               variant="outlined"
-              type="number"
               value={gradeValue}
+              disabled={isLoading || isError || !className}
               onChange={handleGradeChange}
-              inputProps={{ min: 0, max: 100 }}
               required
               sx={{ width: 150 }}
             />
@@ -192,7 +179,7 @@ export default function GradesPage() {
               type="submit"
               variant="contained"
               color="primary"
-              disabled={loading}
+              disabled={isLoading}
               sx={{ height: 56 }}
             >
               Add Grade
@@ -224,11 +211,13 @@ export default function GradesPage() {
         All Grades
       </Typography>
 
-      {loading ? (
+      {isLoading && (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
           <CircularProgress />
         </Box>
-      ) : grades.length > 0 ? (
+      )}
+
+      {grades?.length > 0 ? (
         <TableContainer component={Paper}>
           <Table>
             <TableHead>

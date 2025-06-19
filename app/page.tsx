@@ -16,17 +16,6 @@ export default function Home() {
         Full Stack Developer Assessment
       </Typography>
 
-      <Typography
-        variant="h5"
-        component="h2"
-        gutterBottom
-        textAlign="center"
-        color="text.secondary"
-        sx={{ mb: 4 }}
-      >
-        React, Next.js, and PostgreSQL Demo
-      </Typography>
-
       <Box
         sx={{
           display: 'flex',
@@ -74,14 +63,6 @@ export default function Home() {
           </CardContent>
         </Card>
       </Box>
-
-      <Typography
-        variant="body2"
-        sx={{ mt: 8, textAlign: 'center', color: 'text.secondary' }}
-      >
-        This application demonstrates proficiency in React, Next.js, and raw SQL
-        operations.
-      </Typography>
     </Container>
   );
 }

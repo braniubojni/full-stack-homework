@@ -17,7 +17,8 @@ import {
   Snackbar,
   CircularProgress,
 } from '@mui/material';
-import { useAppContext } from '../context/AppContext';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { QUERY_KEYS, ROUTES } from '../common/consts';
 
 type NumberPair = {
   id1: number;
@@ -29,42 +30,46 @@ type NumberPair = {
 
 export default function NumbersPage() {
   const [value, setValue] = useState<string>('');
-  const [pairs, setPairs] = useState<NumberPair[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const { refreshTrigger, triggerRefresh } = useAppContext();
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    // Initialize database on component mount
-    fetch('/api/init')
-      .then((response) => {
-        if (!response.ok) throw new Error('Failed to initialize database');
-      })
-      .catch((err) => {
-        console.error('Database initialization error:', err);
+  const { data: pairs = [], isLoading } = useQuery<NumberPair[]>({
+    queryKey: [QUERY_KEYS.NUMBER_PAIRS],
+    queryFn: async () => {
+      const response = await fetch(ROUTES.NUMBERS);
+      if (!response.ok) {
+        throw new Error('Failed to fetch number pairs');
+      }
+      return response.json();
+    },
+    initialData: [],
+  });
+  const { mutate, isError } = useMutation({
+    gcTime: 0,
+    mutationFn: async (newValue: number) => {
+      const response = await fetch(ROUTES.NUMBERS, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ value: newValue }),
       });
-  }, []);
-
-  useEffect(() => {
-    // Fetch number pairs
-    setLoading(true);
-    fetch('/api/numbers')
-      .then((response) => {
-        if (!response.ok) throw new Error('Failed to fetch number pairs');
-        return response.json();
-      })
-      .then((data) => {
-        setPairs(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error('Error fetching pairs:', err);
-        setError('Failed to load number pairs. Please try again.');
-        setLoading(false);
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to add number');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      setValue('');
+      setSuccess('Number added successfully');
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.NUMBER_PAIRS],
       });
-  }, [refreshTrigger]);
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,27 +80,8 @@ export default function NumbersPage() {
       return;
     }
 
-    try {
-      const response = await fetch('/api/numbers', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ value: Number(value) }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to add number');
-      }
-
-      setValue('');
-      setSuccess('Number added successfully');
-      triggerRefresh(); // Refresh the table
-    } catch (err) {
-      console.error('Error adding number:', err);
-      setError(err instanceof Error ? err.message : 'Failed to add number');
-    }
+    const newValue = Number(value);
+    mutate(newValue);
   };
 
   return (
@@ -126,7 +112,8 @@ export default function NumbersPage() {
               type="submit"
               variant="contained"
               color="primary"
-              disabled={loading}
+              disabled={isLoading}
+              loading={isLoading}
             >
               Add
             </Button>
@@ -137,12 +124,12 @@ export default function NumbersPage() {
       <Typography variant="h5" gutterBottom>
         Adjacent Number Pairs
       </Typography>
-
-      {loading ? (
+      {isLoading && (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
           <CircularProgress />
         </Box>
-      ) : pairs.length > 0 ? (
+      )}
+      {pairs && pairs?.length > 0 ? (
         <TableContainer component={Paper}>
           <Table>
             <TableHead>

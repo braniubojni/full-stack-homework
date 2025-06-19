@@ -8,11 +8,16 @@ import {
   Toolbar,
   Typography,
 } from '@mui/material';
+import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 export default function Navigation() {
   const pathname = usePathname();
+  useQuery({
+    queryKey: ['navigation'],
+    queryFn: async () => fetch('/api/init'),
+  });
 
   return (
     <AppBar position="static" color="primary" sx={{ mb: 4 }}>
