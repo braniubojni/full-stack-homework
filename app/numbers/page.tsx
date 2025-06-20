@@ -39,7 +39,11 @@ export default function NumbersPage() {
 
   const queryClient = useQueryClient();
 
-  const { data = [], isLoading } = useQuery<NumberPair[]>({
+  const {
+    data = [],
+    isLoading,
+    isFetched,
+  } = useQuery<NumberPair[]>({
     queryKey: [QUERY_KEYS.NUMBER_PAIRS],
     queryFn: async () => {
       const response = await fetch(ROUTES.NUMBERS);
@@ -48,7 +52,6 @@ export default function NumbersPage() {
       }
       return response.json();
     },
-    initialData: [],
   });
   const pairs = (data || []) as NumberPair[];
   const { mutate } = useMutation({
@@ -137,71 +140,85 @@ export default function NumbersPage() {
       <Typography variant="h5" gutterBottom>
         Adjacent Number Pairs
       </Typography>
-      {(pairs && pairs?.length > 0) || isLoading ? (
-        <TableContainer
-          component={Paper}
-          data-testid="table-container"
-          sx={{
-            overflowX: 'auto',
-            '.MuiTableCell-root': {
-              whiteSpace: 'nowrap',
-              px: isMobile ? 1 : 2,
-            },
-          }}
-        >
-          <Table size={isMobile ? 'small' : 'medium'}>
-            <TableHead>
+
+      <TableContainer
+        component={Paper}
+        data-testid="table-container"
+        sx={{
+          overflowX: 'auto',
+          '.MuiTableCell-root': {
+            whiteSpace: 'nowrap',
+            px: isMobile ? 1 : 2,
+          },
+        }}
+      >
+        <Table size={isMobile ? 'small' : 'medium'}>
+          <TableHead>
+            <TableRow>
+              <TableCell data-testid="ID-1">ID 1</TableCell>
+              <TableCell data-testid="Number-1">Number 1</TableCell>
+              <TableCell data-testid="ID-2">ID 2</TableCell>
+              <TableCell data-testid="Number-2">Number 2</TableCell>
+              <TableCell data-testid="Sum">Sum</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {!isLoading && isFetched && pairs?.length === 0 && (
               <TableRow>
-                <TableCell data-testid="ID-1">ID 1</TableCell>
-                <TableCell data-testid="Number-1">Number 1</TableCell>
-                <TableCell data-testid="ID-2">ID 2</TableCell>
-                <TableCell data-testid="Number-2">Number 2</TableCell>
-                <TableCell data-testid="Sum">Sum</TableCell>
+                <TableCell colSpan={5} align="center">
+                  <Typography variant="body1" color="textSecondary">
+                    No number pairs found. Please add a number to get started.
+                  </Typography>
+                </TableCell>
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {isLoading
-                ? // Skeleton loading rows for the table
-                  Array.from(new Array(4)).map((_, index) => (
-                    <TableRow key={`skeleton-${index}`}>
-                      <TableCell>
-                        <Skeleton animation="wave" />
-                      </TableCell>
-                      <TableCell>
-                        <Skeleton animation="wave" />
-                      </TableCell>
-                      <TableCell>
-                        <Skeleton animation="wave" />
-                      </TableCell>
-                      <TableCell>
-                        <Skeleton animation="wave" />
-                      </TableCell>
-                      <TableCell>
-                        <Skeleton animation="wave" />
-                      </TableCell>
-                    </TableRow>
-                  ))
-                : pairs.map((pair, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{pair.id1}</TableCell>
-                      <TableCell>{pair.number1}</TableCell>
-                      <TableCell>{pair.id2}</TableCell>
-                      <TableCell>{pair.number2}</TableCell>
-                      <TableCell>{pair.sum}</TableCell>
-                    </TableRow>
-                  ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      ) : (
-        !isLoading && (
-          <Paper elevation={2} sx={{ p: 3, textAlign: 'center' }}>
-            <Typography>
-              No number pairs available. Add at least two numbers to see pairs.
-            </Typography>
-          </Paper>
-        )
-      )}
+            )}
+            {isLoading
+              ? Array.from(new Array(4)).map((_, index) => (
+                  <TableRow key={`skeleton-${index}`}>
+                    <TableCell>
+                      <Skeleton
+                        animation="wave"
+                        data-testid="pair-number-skeleton"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton
+                        animation="wave"
+                        data-testid="pair-number-skeleton"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton
+                        animation="wave"
+                        data-testid="pair-number-skeleton"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton
+                        animation="wave"
+                        data-testid="pair-number-skeleton"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton
+                        animation="wave"
+                        data-testid="pair-number-skeleton"
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))
+              : pairs.map((pair, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{pair.id1}</TableCell>
+                    <TableCell>{pair.number1}</TableCell>
+                    <TableCell>{pair.id2}</TableCell>
+                    <TableCell>{pair.number2}</TableCell>
+                    <TableCell>{pair.sum}</TableCell>
+                  </TableRow>
+                ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
       {/* Error Snackbar */}
       <Snackbar

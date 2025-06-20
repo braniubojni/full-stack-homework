@@ -93,7 +93,7 @@ describe('NumbersPage Unit Tests', () => {
     // Check table title
     expect(screen.getByText('Adjacent Number Pairs')).toBeInTheDocument();
     // Check table container
-    expect(screen.getByTestId('table-container')).toBeInTheDocument();
+    expect(await screen.findByTestId('table-container')).toBeInTheDocument();
 
     // Check table headers
     expect(screen.getByTestId('ID-1')).toBeInTheDocument();
@@ -125,17 +125,18 @@ describe('NumbersPage Unit Tests', () => {
     expect(progressBars.length).toBeGreaterThan(0);
   });
 
-  it('displays empty state message when no numbers exist', () => {
+  it('displays empty state message when no numbers exist', async () => {
     // Mock empty data
     (useQuery as jest.Mock).mockReturnValue({
       data: [],
       isLoading: false,
+      isFetched: true,
     });
     renderWithQueryClient(<NumbersPage />);
     // Check for no data message
     expect(
       screen.getByText(
-        'No number pairs available. Add at least two numbers to see pairs.'
+        'No number pairs found. Please add a number to get started.'
       )
     ).toBeInTheDocument();
   });

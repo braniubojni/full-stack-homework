@@ -184,6 +184,7 @@ describe('NumbersPage Edge Case Tests', () => {
     (useQuery as jest.Mock).mockReturnValue({
       data: [],
       isLoading: false,
+      isFetched: true,
     });
 
     renderWithQueryClient(<NumbersPage />);
@@ -191,7 +192,7 @@ describe('NumbersPage Edge Case Tests', () => {
     // Should display the "no data" message
     expect(
       screen.getByText(
-        'No number pairs available. Add at least two numbers to see pairs.'
+        'No number pairs found. Please add a number to get started.'
       )
     ).toBeInTheDocument();
   });

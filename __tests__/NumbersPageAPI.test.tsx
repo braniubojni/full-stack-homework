@@ -48,7 +48,7 @@ describe('NumbersPage API Integration Tests', () => {
       expect(screen.getByTestId('table-container')).toBeInTheDocument();
       // Check for the data we mocked
       const rows = screen.getAllByRole('row');
-      expect(rows).toHaveLength(mockNumberPairsData.length + 1); // +1 for header row
+      expect(rows.length).toBe(mockNumberPairsData.length + 1);
       mockNumberPairsData.forEach((pair) => {
         expect(screen.getByText(pair.number1.toString())).toBeInTheDocument();
         expect(screen.getByText(pair.number2.toString())).toBeInTheDocument();
@@ -70,7 +70,7 @@ describe('NumbersPage API Integration Tests', () => {
     await waitFor(() => {
       expect(
         screen.getByText(
-          'No number pairs available. Add at least two numbers to see pairs.'
+          'No number pairs found. Please add a number to get started.'
         )
       ).toBeInTheDocument();
     });

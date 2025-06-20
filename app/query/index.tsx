@@ -19,7 +19,7 @@ type QueryProps = { children?: React.ReactNode };
 
 const queryClient = new QueryClient();
 
-const Query: FC<QueryProps> = ({ children }) => {
+const Providers: FC<QueryProps> = ({ children }) => {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
@@ -62,4 +62,4 @@ const ThemeWrapper: FC<QueryProps> = ({ children }) => {
   );
 };
 
-export default Query;
+export default Providers;

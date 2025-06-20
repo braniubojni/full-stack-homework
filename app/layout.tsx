@@ -1,10 +1,10 @@
+import { NoSsr } from '@mui/material';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import Navigation from './components/Navigation';
 import './globals.css';
-import Query from './query';
+import Providers from './query';
 import { themeInitScript } from './utils/themeInitScript';
-import { NoSsr } from '@mui/material';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -35,10 +35,10 @@ export default function RootLayout({
         </NoSsr>
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <Query>
+        <Providers>
           <Navigation />
           <main className="container mx-auto p-4">{children}</main>
-        </Query>
+        </Providers>
       </body>
     </html>
   );

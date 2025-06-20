@@ -60,103 +60,101 @@ export default function Navigation() {
   ];
 
   return (
-    <NoSsr>
-      <AppBar position="static" color="primary" sx={{ mb: 4 }}>
-        <Container maxWidth="xl">
-          <Toolbar disableGutters>
-            <Typography
-              variant="h6"
-              component="div"
-              sx={{ flexGrow: 1, display: 'flex' }}
-              noWrap
-            >
-              Full Stack Assessment
-            </Typography>
+    <AppBar position="static" color="primary" sx={{ mb: 4 }} elevation={0}>
+      <Container maxWidth="xl">
+        <Toolbar disableGutters>
+          <Typography
+            variant="h6"
+            component="div"
+            sx={{ flexGrow: 1, display: 'flex' }}
+            noWrap
+          >
+            Full Stack Assessment
+          </Typography>
 
-            {/* Dark mode toggle button */}
-            <Tooltip
-              title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+          {/* Dark mode toggle button */}
+          <Tooltip
+            title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            <IconButton
+              color="inherit"
+              onClick={toggleDarkMode}
+              edge={isMobile ? false : 'end'}
+              size="large"
+              sx={{ mr: isMobile ? 1 : 0 }}
+              aria-label="toggle dark mode"
             >
+              {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
+            </IconButton>
+          </Tooltip>
+
+          {isMobile ? (
+            <>
               <IconButton
-                color="inherit"
-                onClick={toggleDarkMode}
-                edge={isMobile ? false : 'end'}
                 size="large"
-                sx={{ mr: isMobile ? 1 : 0 }}
-                aria-label="toggle dark mode"
+                edge="end"
+                color="inherit"
+                aria-label="menu"
+                onClick={handleMenu}
               >
-                {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
+                <MenuIcon />
               </IconButton>
-            </Tooltip>
-
-            {isMobile ? (
-              <>
-                <IconButton
-                  size="large"
-                  edge="end"
-                  color="inherit"
-                  aria-label="menu"
-                  onClick={handleMenu}
-                >
-                  <MenuIcon />
-                </IconButton>
-                <Menu
-                  id="menu-appbar"
-                  anchorEl={anchorEl}
-                  anchorOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                  }}
-                  keepMounted
-                  transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                  }}
-                  open={open}
-                  onClose={handleClose}
-                >
-                  {navItems.map((item) => (
-                    <MenuItem
-                      key={item.path}
-                      component={Link}
-                      href={item.path}
-                      onClick={handleClose}
-                      selected={pathname === item.path}
-                    >
-                      {item.label}
-                    </MenuItem>
-                  ))}
-                </Menu>
-              </>
-            ) : (
-              <Box sx={{ display: 'flex', gap: 2 }}>
+              <Menu
+                id="menu-appbar"
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                open={open}
+                onClose={handleClose}
+              >
                 {navItems.map((item) => (
-                  <Button
+                  <MenuItem
                     key={item.path}
                     component={Link}
                     href={item.path}
-                    color="inherit"
-                    variant={pathname === item.path ? 'outlined' : 'text'}
+                    onClick={handleClose}
+                    selected={pathname === item.path}
                   >
                     {item.label}
-                  </Button>
+                  </MenuItem>
                 ))}
-              </Box>
-            )}
-          </Toolbar>
-        </Container>
+              </Menu>
+            </>
+          ) : (
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              {navItems.map((item) => (
+                <Button
+                  key={item.path}
+                  component={Link}
+                  href={item.path}
+                  color="inherit"
+                  variant={pathname === item.path ? 'outlined' : 'text'}
+                >
+                  {item.label}
+                </Button>
+              ))}
+            </Box>
+          )}
+        </Toolbar>
+      </Container>
 
-        <Snackbar
-          open={isError}
-          autoHideDuration={3000}
-          onClose={() => {}}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        >
-          <Alert severity="error">
-            Failed to initialize tables. Please check the server logs.
-          </Alert>
-        </Snackbar>
-      </AppBar>
-    </NoSsr>
+      <Snackbar
+        open={isError}
+        autoHideDuration={3000}
+        onClose={() => {}}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="error">
+          Failed to initialize tables. Please check the server logs.
+        </Alert>
+      </Snackbar>
+    </AppBar>
   );
 }

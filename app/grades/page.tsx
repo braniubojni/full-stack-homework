@@ -28,13 +28,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { QUERY_KEYS, ROUTES } from '../common/consts';
-
-type Grade = {
-  id: number;
-  class: string;
-  grade: number;
-  created_at?: string;
-};
+import { calculateClassStatistics, Grade } from './helpers';
 
 export default function GradesPage() {
   const theme = useTheme();
@@ -53,7 +47,6 @@ export default function GradesPage() {
       }
       return response.json();
     },
-    initialData: [],
   });
   const grades = (data || []) as Grade[];
   const { mutate, isError } = useMutation({
@@ -85,32 +78,7 @@ export default function GradesPage() {
   });
 
   // Calculate class statistics
-  const classStatistics = {
-    Math: {
-      count: grades.filter((grade) => grade.class === 'Math').length,
-      average: calculateAverage(
-        grades.filter((grade) => grade.class === 'Math')
-      ),
-    },
-    Science: {
-      count: grades.filter((grade) => grade.class === 'Science').length,
-      average: calculateAverage(
-        grades.filter((grade) => grade.class === 'Science')
-      ),
-    },
-    History: {
-      count: grades.filter((grade) => grade.class === 'History').length,
-      average: calculateAverage(
-        grades.filter((grade) => grade.class === 'History')
-      ),
-    },
-  };
-
-  function calculateAverage(grades: Grade[]): number {
-    if (grades.length === 0) return 0;
-    const sum = grades.reduce((acc, curr) => acc + curr.grade, 0);
-    return Math.round((sum / grades.length) * 10) / 10;
-  }
+  const classStatistics = calculateClassStatistics(grades);
 
   const handleClassChange = (event: SelectChangeEvent) => {
     setClassName(event.target.value);
