@@ -66,7 +66,8 @@ export default function Navigation() {
           <Typography
             variant="h6"
             component="div"
-            sx={{ flexGrow: 1, display: 'flex' }}
+            sx={{ flexGrow: 1, display: 'flex', cursor: 'pointer' }}
+            onClick={() => (window.location.href = '/')}
             noWrap
           >
             Full Stack Assessment

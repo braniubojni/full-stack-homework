@@ -1,6 +1,5 @@
 import postgres from 'postgres';
 
-// TODO: ADD env sample
 const sql = postgres({
   port: +(process.env.DB_PORT || 5432),
   host: process.env.DB_HOST || 'localhost',

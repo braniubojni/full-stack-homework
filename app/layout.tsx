@@ -1,19 +1,16 @@
 import { NoSsr } from '@mui/material';
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Roboto } from 'next/font/google';
 import Navigation from './components/Navigation';
 import './globals.css';
 import Providers from './query';
 import { themeInitScript } from './utils/themeInitScript';
-
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const roboto = Roboto({
+  weight: ['300', '400', '500', '700'],
   subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-roboto',
 });
 
 export const metadata: Metadata = {
@@ -27,18 +24,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={roboto.variable}>
       <head>
         {/* Preventing FOUC by setting the font variables early */}
         <NoSsr>
           <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         </NoSsr>
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <Providers>
-          <Navigation />
-          <main className="container mx-auto p-4">{children}</main>
-        </Providers>
+      <body>
+        <AppRouterCacheProvider>
+          <Providers>
+            <Navigation />
+            <main className="container mx-auto p-4">{children}</main>
+          </Providers>
+        </AppRouterCacheProvider>
       </body>
     </html>
   );
