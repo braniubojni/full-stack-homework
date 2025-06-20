@@ -20,7 +20,7 @@ export async function GET() {
       });
     }
 
-    return NextResponse.json(pairs);
+    return NextResponse.json({ pairs, count: numbers.length });
   } catch (error) {
     console.error('Error fetching number pairs:', error);
     return NextResponse.json(

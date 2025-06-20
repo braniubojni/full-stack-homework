@@ -22,12 +22,15 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { QUERY_KEYS, ROUTES } from '../common/consts';
 
-type NumberPair = {
-  id1: number;
-  number1: number;
-  id2: number;
-  number2: number;
-  sum: number;
+type NumberPairResponse = {
+  pairs: {
+    id1: number;
+    number1: number;
+    id2: number;
+    number2: number;
+    sum: number;
+  }[];
+  count: number;
 };
 
 export default function NumbersPage() {
@@ -39,21 +42,17 @@ export default function NumbersPage() {
 
   const queryClient = useQueryClient();
 
-  const {
-    data = [],
-    isLoading,
-    isFetched,
-  } = useQuery<NumberPair[]>({
+  const { data, isLoading, isFetched } = useQuery<NumberPairResponse>({
     queryKey: [QUERY_KEYS.NUMBER_PAIRS],
     queryFn: async () => {
       const response = await fetch(ROUTES.NUMBERS);
       if (!response.ok) {
         throw new Error('Failed to fetch number pairs');
       }
-      return response.json();
+      return response.json() as Promise<NumberPairResponse>;
     },
   });
-  const pairs = (data || []) as NumberPair[];
+  const pairs = data?.pairs || [];
   const { mutate } = useMutation({
     gcTime: 0,
     mutationFn: async (newValue: number) => {
@@ -167,7 +166,9 @@ export default function NumbersPage() {
               <TableRow>
                 <TableCell colSpan={5} align="center">
                   <Typography variant="body1" color="textSecondary">
-                    No number pairs found. Please add a number to get started.
+                    {data?.count === 0
+                      ? 'No number pairs found. Please add a number to get started.'
+                      : 'Add one or more numbers to see pairs.'}
                   </Typography>
                 </TableCell>
               </TableRow>
