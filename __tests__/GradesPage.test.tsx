@@ -61,7 +61,7 @@ describe('GradesPage', () => {
 
     // Default mock implementations for react-query hooks
     (useQuery as jest.Mock).mockImplementation(({ queryKey, queryFn }) => {
-      if (Array.isArray(queryKey[0]) && queryKey[0][0] === 'grades') {
+      if (queryKey?.[0] === 'grades') {
         return { data: sampleGrades, isLoading: false };
       }
       return { data: null, isLoading: false };

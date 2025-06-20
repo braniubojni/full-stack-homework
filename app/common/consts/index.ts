@@ -5,10 +5,10 @@ export const ROUTES = {
 } as const;
 
 export const QUERY_KEYS = {
-  NUMBER_PAIRS: ['numberPairs'],
-  GRADES: ['grades'],
-  INIT: ['init'],
-  CLASS_STATISTICS: ['classStatistics'],
-  ADD_GRADE: ['addGrade'],
-  ADD_NUMBER: ['addNumber'],
+  NUMBER_PAIRS: 'numberPairs',
+  GRADES: 'grades',
+  INIT: 'init',
+  CLASS_STATISTICS: 'classStatistics',
+  ADD_GRADE: 'addGrade',
+  ADD_NUMBER: 'addNumber',
 } as const;

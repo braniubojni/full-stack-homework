@@ -35,7 +35,7 @@ export default function NumbersPage() {
 
   const queryClient = useQueryClient();
 
-  const { data: pairs = [], isLoading } = useQuery<NumberPair[]>({
+  const { data = [], isLoading } = useQuery<NumberPair[]>({
     queryKey: [QUERY_KEYS.NUMBER_PAIRS],
     queryFn: async () => {
       const response = await fetch(ROUTES.NUMBERS);
@@ -46,7 +46,8 @@ export default function NumbersPage() {
     },
     initialData: [],
   });
-  const { mutate, isError } = useMutation({
+  const pairs = (data || []) as NumberPair[];
+  const { mutate } = useMutation({
     gcTime: 0,
     mutationFn: async (newValue: number) => {
       const response = await fetch(ROUTES.NUMBERS, {
@@ -130,15 +131,15 @@ export default function NumbersPage() {
         </Box>
       )}
       {pairs && pairs?.length > 0 ? (
-        <TableContainer component={Paper}>
+        <TableContainer component={Paper} data-testid="table-container">
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>ID 1</TableCell>
-                <TableCell>Number 1</TableCell>
-                <TableCell>ID 2</TableCell>
-                <TableCell>Number 2</TableCell>
-                <TableCell>Sum</TableCell>
+                <TableCell data-testid="ID-1">ID 1</TableCell>
+                <TableCell data-testid="Number-1">Number 1</TableCell>
+                <TableCell data-testid="ID-2">ID 2</TableCell>
+                <TableCell data-testid="Number-2">Number 2</TableCell>
+                <TableCell data-testid="Sum">Sum</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
