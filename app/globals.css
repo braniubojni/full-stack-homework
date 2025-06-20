@@ -11,8 +11,18 @@
   --success: #2e7d32;
 }
 
+/* Dark mode variables will now be handled by the ThemeContext and MUI ThemeProvider */
+:root[data-theme='dark'] {
+  --background: #121212;
+  --foreground: #f5f5f5;
+  --primary: #90caf9;
+  --primary-light: #e3f2fd;
+  --secondary: #ce93d8;
+  --secondary-light: #f3e5f5;
+}
+
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --background: #121212;
     --foreground: #f5f5f5;
     --primary: #90caf9;
@@ -52,4 +62,11 @@ a {
   html {
     color-scheme: dark;
   }
+}
+
+.container {
+  max-width: 1200px;
+  min-width: 320px;
+  margin: 0 auto;
+  padding: 0 2rem;
 }

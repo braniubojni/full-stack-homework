@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import Navigation from './components/Navigation';
 import './globals.css';
 import Query from './query';
+import { themeInitScript } from './utils/themeInitScript';
+import { NoSsr } from '@mui/material';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -26,6 +28,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        {/* Preventing FOUC by setting the font variables early */}
+        <NoSsr>
+          <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        </NoSsr>
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <Query>
           <Navigation />

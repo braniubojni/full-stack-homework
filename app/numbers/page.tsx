@@ -1,23 +1,25 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import {
+  Alert,
   Box,
-  Typography,
-  TextField,
   Button,
   Paper,
+  Skeleton,
+  Snackbar,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Alert,
-  Snackbar,
-  CircularProgress,
+  TextField,
+  Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import { QUERY_KEYS, ROUTES } from '../common/consts';
 
 type NumberPair = {
@@ -29,6 +31,8 @@ type NumberPair = {
 };
 
 export default function NumbersPage() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [value, setValue] = useState<string>('');
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -97,7 +101,14 @@ export default function NumbersPage() {
             Add a new number
           </Typography>
 
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: isMobile ? 'column' : 'row',
+              gap: 2,
+              alignItems: isMobile ? 'stretch' : 'center',
+            }}
+          >
             <TextField
               label="Enter an integer"
               variant="outlined"
@@ -106,7 +117,7 @@ export default function NumbersPage() {
               onChange={(e) => setValue(e.target.value)}
               required
               fullWidth
-              sx={{ maxWidth: 300 }}
+              sx={{ maxWidth: isMobile ? '100%' : 300 }}
             />
 
             <Button
@@ -115,6 +126,7 @@ export default function NumbersPage() {
               color="primary"
               disabled={isLoading}
               loading={isLoading}
+              sx={{ width: isMobile ? '100%' : 'auto' }}
             >
               Add
             </Button>
@@ -125,14 +137,19 @@ export default function NumbersPage() {
       <Typography variant="h5" gutterBottom>
         Adjacent Number Pairs
       </Typography>
-      {isLoading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-          <CircularProgress />
-        </Box>
-      )}
-      {pairs && pairs?.length > 0 ? (
-        <TableContainer component={Paper} data-testid="table-container">
-          <Table>
+      {(pairs && pairs?.length > 0) || isLoading ? (
+        <TableContainer
+          component={Paper}
+          data-testid="table-container"
+          sx={{
+            overflowX: 'auto',
+            '.MuiTableCell-root': {
+              whiteSpace: 'nowrap',
+              px: isMobile ? 1 : 2,
+            },
+          }}
+        >
+          <Table size={isMobile ? 'small' : 'medium'}>
             <TableHead>
               <TableRow>
                 <TableCell data-testid="ID-1">ID 1</TableCell>
@@ -143,24 +160,47 @@ export default function NumbersPage() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {pairs.map((pair, index) => (
-                <TableRow key={index}>
-                  <TableCell>{pair.id1}</TableCell>
-                  <TableCell>{pair.number1}</TableCell>
-                  <TableCell>{pair.id2}</TableCell>
-                  <TableCell>{pair.number2}</TableCell>
-                  <TableCell>{pair.sum}</TableCell>
-                </TableRow>
-              ))}
+              {isLoading
+                ? // Skeleton loading rows for the table
+                  Array.from(new Array(4)).map((_, index) => (
+                    <TableRow key={`skeleton-${index}`}>
+                      <TableCell>
+                        <Skeleton animation="wave" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton animation="wave" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton animation="wave" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton animation="wave" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton animation="wave" />
+                      </TableCell>
+                    </TableRow>
+                  ))
+                : pairs.map((pair, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{pair.id1}</TableCell>
+                      <TableCell>{pair.number1}</TableCell>
+                      <TableCell>{pair.id2}</TableCell>
+                      <TableCell>{pair.number2}</TableCell>
+                      <TableCell>{pair.sum}</TableCell>
+                    </TableRow>
+                  ))}
             </TableBody>
           </Table>
         </TableContainer>
       ) : (
-        <Paper elevation={2} sx={{ p: 3, textAlign: 'center' }}>
-          <Typography>
-            No number pairs available. Add at least two numbers to see pairs.
-          </Typography>
-        </Paper>
+        !isLoading && (
+          <Paper elevation={2} sx={{ p: 3, textAlign: 'center' }}>
+            <Typography>
+              No number pairs available. Add at least two numbers to see pairs.
+            </Typography>
+          </Paper>
+        )
       )}
 
       {/* Error Snackbar */}

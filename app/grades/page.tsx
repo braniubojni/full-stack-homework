@@ -6,13 +6,13 @@ import {
   Button,
   Card,
   CardContent,
-  CircularProgress,
   FormControl,
   InputLabel,
   MenuItem,
   Paper,
   Select,
   SelectChangeEvent,
+  Skeleton,
   Snackbar,
   Table,
   TableBody,
@@ -22,9 +22,11 @@ import {
   TableRow,
   TextField,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { QUERY_KEYS, ROUTES } from '../common/consts';
 
 type Grade = {
@@ -35,6 +37,8 @@ type Grade = {
 };
 
 export default function GradesPage() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const queryClient = useQueryClient();
   const [className, setClassName] = useState<string>('');
   const [gradeValue, setGradeValue] = useState<string>('');
@@ -150,8 +154,17 @@ export default function GradesPage() {
             Add a new grade
           </Typography>
 
-          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-            <FormControl sx={{ minWidth: 200 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: isMobile ? 'column' : 'row',
+              gap: 2,
+              flexWrap: 'wrap',
+            }}
+          >
+            <FormControl
+              sx={{ minWidth: 200, width: isMobile ? '100%' : 'auto' }}
+            >
               <InputLabel id="class-select-label">Class</InputLabel>
               <Select
                 labelId="class-select-label"
@@ -179,7 +192,7 @@ export default function GradesPage() {
               disabled={isLoading || isError || !className}
               onChange={handleGradeChange}
               required
-              sx={{ width: 150 }}
+              sx={{ width: isMobile ? '100%' : 150 }}
             />
 
             <Button
@@ -187,7 +200,7 @@ export default function GradesPage() {
               variant="contained"
               color="primary"
               disabled={isLoading}
-              sx={{ height: 56 }}
+              sx={{ height: 56, width: isMobile ? '100%' : 'auto' }}
             >
               Add Grade
             </Button>
@@ -195,42 +208,77 @@ export default function GradesPage() {
         </form>
       </Paper>
 
-      {/* Class Statistics */}
       <Typography variant="h5" gutterBottom>
         Class Statistics
       </Typography>
 
-      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 4 }}>
-        {Object.entries(classStatistics).map(([className, stats]) => (
-          <Card
-            key={className}
-            sx={{ minWidth: 200, flex: '1 1 30%' }}
-            data-testid={`class-stat-${className}`}
-          >
-            <CardContent>
-              <Typography variant="h6">{className}</Typography>
-              <Typography variant="body1">Grades: {stats.count}</Typography>
-              <Typography variant="body1">
-                Average: {stats.count > 0 ? `${stats.average}%` : 'N/A'}
-              </Typography>
-            </CardContent>
-          </Card>
-        ))}
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: isMobile ? 'column' : 'row',
+          gap: 2,
+          flexWrap: 'wrap',
+          mb: 4,
+        }}
+      >
+        {isLoading ? (
+          // Skeleton loaders for class statistics cards
+          <>
+            {['Math', 'Science', 'History'].map((className) => (
+              <Card
+                key={className}
+                sx={{
+                  minWidth: isMobile ? '100%' : 200,
+                  flex: isMobile ? '1 1 100%' : '1 1 30%',
+                }}
+              >
+                <CardContent>
+                  <Skeleton variant="text" width="40%" height={32} />
+                  <Skeleton variant="text" width="60%" />
+                  <Skeleton variant="text" width="70%" />
+                </CardContent>
+              </Card>
+            ))}
+          </>
+        ) : (
+          // Actual class statistics cards
+          Object.entries(classStatistics).map(([className, stats]) => (
+            <Card
+              key={className}
+              sx={{
+                minWidth: isMobile ? '100%' : 200,
+                flex: isMobile ? '1 1 100%' : '1 1 30%',
+              }}
+              data-testid={`class-stat-${className}`}
+            >
+              <CardContent>
+                <Typography variant="h6">{className}</Typography>
+                <Typography variant="body1">Grades: {stats.count}</Typography>
+                <Typography variant="body1">
+                  Average: {stats.count > 0 ? `${stats.average}%` : 'N/A'}
+                </Typography>
+              </CardContent>
+            </Card>
+          ))
+        )}
       </Box>
 
       <Typography variant="h5" gutterBottom>
         All Grades
       </Typography>
 
-      {isLoading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-          <CircularProgress />
-        </Box>
-      )}
-
-      {grades?.length > 0 ? (
-        <TableContainer component={Paper}>
-          <Table>
+      {grades?.length > 0 || isLoading ? (
+        <TableContainer
+          component={Paper}
+          sx={{
+            overflowX: 'auto',
+            '.MuiTableCell-root': {
+              whiteSpace: 'nowrap',
+              px: isMobile ? 1 : 2,
+            },
+          }}
+        >
+          <Table size={isMobile ? 'small' : 'medium'}>
             <TableHead>
               <TableRow>
                 <TableCell data-testid={'table-header-ID'}>ID</TableCell>
@@ -242,27 +290,47 @@ export default function GradesPage() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {grades.map((grade) => (
-                <TableRow key={grade.id}>
-                  <TableCell>{grade.id}</TableCell>
-                  <TableCell>{grade.class}</TableCell>
-                  <TableCell>{grade.grade}</TableCell>
-                  <TableCell>
-                    {grade.created_at
-                      ? new Date(grade.created_at).toLocaleDateString()
-                      : 'N/A'}
-                  </TableCell>
-                </TableRow>
-              ))}
+              {isLoading
+                ? // Skeleton loading rows for the table
+                  Array.from(new Array(5)).map((_, index) => (
+                    <TableRow key={`skeleton-${index}`}>
+                      <TableCell>
+                        <Skeleton animation="wave" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton animation="wave" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton animation="wave" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton animation="wave" width="60%" />
+                      </TableCell>
+                    </TableRow>
+                  ))
+                : grades.map((grade) => (
+                    <TableRow key={grade.id}>
+                      <TableCell>{grade.id}</TableCell>
+                      <TableCell>{grade.class}</TableCell>
+                      <TableCell>{grade.grade}</TableCell>
+                      <TableCell>
+                        {grade.created_at
+                          ? new Date(grade.created_at).toLocaleDateString()
+                          : 'N/A'}
+                      </TableCell>
+                    </TableRow>
+                  ))}
             </TableBody>
           </Table>
         </TableContainer>
       ) : (
-        <Paper elevation={2} sx={{ p: 3, textAlign: 'center' }}>
-          <Typography>
-            No grades available. Add grades to see them here.
-          </Typography>
-        </Paper>
+        !isLoading && (
+          <Paper elevation={2} sx={{ p: 3, textAlign: 'center' }}>
+            <Typography>
+              No grades available. Add grades to see them here.
+            </Typography>
+          </Paper>
+        )
       )}
 
       {/* Error Snackbar */}
