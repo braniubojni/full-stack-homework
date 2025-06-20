@@ -38,7 +38,10 @@ describe('NumbersPage API Integration Tests', () => {
     // Setup mock for fetch API
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => mockNumberPairsData,
+      json: async () => ({
+        pairs: mockNumberPairsData,
+        count: mockNumberPairsData.length,
+      }),
     });
 
     renderWithQueryClient(<NumbersPage />);

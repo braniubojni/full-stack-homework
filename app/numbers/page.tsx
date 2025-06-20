@@ -42,7 +42,7 @@ export default function NumbersPage() {
 
   const queryClient = useQueryClient();
 
-  const { data, isLoading, isFetched } = useQuery<NumberPairResponse>({
+  const { data, isLoading, isFetched, isError } = useQuery<NumberPairResponse>({
     queryKey: [QUERY_KEYS.NUMBER_PAIRS],
     queryFn: async () => {
       const response = await fetch(ROUTES.NUMBERS);
@@ -166,7 +166,7 @@ export default function NumbersPage() {
               <TableRow>
                 <TableCell colSpan={5} align="center">
                   <Typography variant="body1" color="textSecondary">
-                    {data?.count === 0
+                    {data?.count === 0 || isError
                       ? 'No number pairs found. Please add a number to get started.'
                       : 'Add one or more numbers to see pairs.'}
                   </Typography>

@@ -161,11 +161,19 @@ describe('NumbersPage Edge Case Tests', () => {
         number2: 10,
         sum: 15,
       },
+      {
+        id1: 2,
+        number1: 10,
+        id2: 3,
+        number2: 15,
+        sum: 25,
+      },
     ];
 
     // Mock the query response with the malformed data
     (useQuery as jest.Mock).mockReturnValue({
-      data: dataWithMalformedDate,
+      // data: dataWithMalformedDate,
+      data: { pairs: dataWithMalformedDate, count: 2 },
       isLoading: false,
     });
 
@@ -174,15 +182,20 @@ describe('NumbersPage Edge Case Tests', () => {
 
     // Verify the component rendered the data without errors
     expect(screen.getByTestId('table-container')).toBeInTheDocument();
-    expect(screen.getByText('5')).toBeInTheDocument();
-    expect(screen.getByText('10')).toBeInTheDocument();
-    expect(screen.getByText('15')).toBeInTheDocument();
+    const tableRows = screen.getAllByRole('row');
+    expect(tableRows).toHaveLength(3); // Header + 2 data rows
+    expect(within(tableRows[1]).getByText('5')).toBeInTheDocument();
+    expect(within(tableRows[1]).getByText('10')).toBeInTheDocument();
+    expect(within(tableRows[1]).getByText('15')).toBeInTheDocument();
+    expect(within(tableRows[2]).getByText('10')).toBeInTheDocument();
+    expect(within(tableRows[2]).getByText('15')).toBeInTheDocument();
+    expect(within(tableRows[2]).getByText('25')).toBeInTheDocument();
   });
 
   it('handles no data response properly', () => {
     // Mock empty data response
     (useQuery as jest.Mock).mockReturnValue({
-      data: [],
+      data: { pairs: [], count: 0 },
       isLoading: false,
       isFetched: true,
     });
