@@ -222,7 +222,6 @@ export default function GradesPage() {
         }}
       >
         {isLoading ? (
-          // Skeleton loaders for class statistics cards
           <>
             {['Math', 'Science', 'History'].map((className) => (
               <Card
@@ -233,15 +232,27 @@ export default function GradesPage() {
                 }}
               >
                 <CardContent>
-                  <Skeleton variant="text" width="40%" height={32} />
-                  <Skeleton variant="text" width="60%" />
-                  <Skeleton variant="text" width="70%" />
+                  <Skeleton
+                    data-testid="skeleton-row"
+                    variant="text"
+                    width="40%"
+                    height={32}
+                  />
+                  <Skeleton
+                    data-testid="skeleton-row"
+                    variant="text"
+                    width="60%"
+                  />
+                  <Skeleton
+                    data-testid="skeleton-row"
+                    variant="text"
+                    width="70%"
+                  />
                 </CardContent>
               </Card>
             ))}
           </>
         ) : (
-          // Actual class statistics cards
           Object.entries(classStatistics).map(([className, stats]) => (
             <Card
               key={className}

@@ -145,8 +145,11 @@ describe('GradesPage', () => {
         isLoading: true,
       });
       renderWithQueryClient(<GradesPage />);
-      // Check for CircularProgress component
-      expect(screen.getByRole('progressbar')).toBeInTheDocument();
+      // Check for Skeleton loading state
+      const skeletons = screen.getAllByTestId('skeleton-row');
+      skeletons.forEach((skeleton) => {
+        expect(skeleton).toBeInTheDocument();
+      });
     });
     it('displays empty state message when no grades exist', () => {
       // Mock empty data
